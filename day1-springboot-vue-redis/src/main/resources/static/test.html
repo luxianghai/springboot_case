@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<div id="wrap">
+  <form action="javascript:void(0)" method="post">
+    name: <input type="text" v-model="user.name"><br/>
+    age: <input type="text" v-model="user.age"><br/>
+    code: <input type="text" v-model="code"><br/>
+    <input type="button" value="提交" @click="submit"><br/>
+  </form>
+  <br>
+  <hr>
+  <br>
+  <form action="javascript:void(0)" method="post">
+    name: <input type="file" ref="file"><br/>
+    <input type="button" value="提交" @click="getImageBase64"><br/>
+  </form>
+</div>
+
+<script src="/ems_vue/js/vue-2.6.11.js"></script>
+<script src="/ems_vue/js/axios.js"></script>
+<script>
+  let app = new Vue({
+    el: '#wrap',
+    data: {
+      user:{},
+      code:'',
+    },
+    methods: {
+      submit() {
+        let formData = new FormData();
+        formData.append("name",this.user.name);
+        formData.append("name",this.user.age);
+        axios({
+          method: 'post',
+          url: 'http://localhost:8989/ems_vue/test/login',
+          data: formData,
+        })
+      },
+      // 获取图片的base64
+      getImageBase64() {
+        let formDate = new FormData();
+        formDate.append("file", this.$refs.file.files[0]);
+        axios({
+          url: 'http://localhost:8989/ems_vue/test/getImageBase64',
+          method: 'post',
+          data: formDate,
+          headers: {
+            'content-type': 'multipart/form-data'
+          }
+        }).then( res => {
+          console.log(res.data);
+        })
+      }
+    }
+  });
+</script>
+</body>
+</html>

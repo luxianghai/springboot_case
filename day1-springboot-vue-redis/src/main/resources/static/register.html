@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<title>regist</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" type="text/css" href="css/style.css" />
+		<script type="">
+
+		</script>
+	</head>
+	<body>
+		<div id="wrap">
+			<div id="top_content">
+					<div id="header">
+						<div id="rightheader">
+							<p>
+								2009/11/20
+								<br />
+							</p>
+						</div>
+						<div id="topheader">
+							<h1 id="title">
+								<a href="#">main</a>
+							</h1>
+						</div>
+						<div id="navigation">
+						</div>
+					</div>
+				<div id="content">
+					<p id="whereami">
+					</p>
+					<h1>
+						注册
+					</h1>
+					<form action="javascript:void(0)" method="post">
+						<table cellpadding="0" cellspacing="0" border="0"
+							class="form_table">
+							<tr>
+								<td valign="middle" align="right">
+									用户名:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" v-model="registerInfo.username"/>
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									真实姓名:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" v-model="registerInfo.realname"/>
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									密码:
+								</td>
+								<td valign="middle" align="left">
+									<input type="password" class="inputgri" v-model="registerInfo.password"/>
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									性别:
+								</td>
+								<td valign="middle" align="left">
+									男
+									<input type="radio" class="inputgri" value="男" checked="checked" v-model="registerInfo.sex"/>
+									女
+									<input type="radio" class="inputgri" value="女" v-model="registerInfo.sex"/>
+								</td>
+							</tr>
+							
+							<tr>
+								<td valign="middle" align="left">
+									验证码:
+								</td>
+								<td  valign="middle" align="right">
+									<input type="text" class="inputgri" v-model="code" />
+								</td>
+								<td>
+									<img id="num" :src="codeUrl" />
+									<a href="javascript:void(0);" @click="getImage">换一张</a>
+								</td>
+							</tr>
+						</table>
+						<p>
+							<input type="button" class="button" value="注册 &raquo;" @click="register"/>
+						</p>
+					</form>
+				</div>
+			</div>
+			<div id="footer">
+				<div id="footer_bg">
+				ABC@126.com
+				</div>
+			</div>
+		</div>
+	</body>
+	<script src="/ems_vue/js/vue-2.6.11.js"></script>
+	<script src="/ems_vue/js/axios.js"></script>
+	<script>
+		let app = new Vue({
+			el: '#wrap',
+			data: {
+				codeUrl: '',
+				registerInfo:{sex:'男'},
+				code:'',
+			},
+			methods: {
+				getImage() {
+					// 获取验证码
+					let _this = this;
+					axios.get("http://localhost:8989/ems_vue/user/getImage?time="+new Date().getTime()).then( (res) => {
+						console.log(res.data);
+						_this.codeUrl = res.data;
+					})
+				},
+				register() {
+					let _this = this;
+					axios.post('http://localhost:8989/ems_vue/user/register?code='+_this.code, this.registerInfo).then( res => {
+						if ( res.data.status) {
+							alert(res.data.msg + ", 点击确定跳转到登录页面");
+							window.location = 'http://localhost:8989/ems_vue/login.html';
+						} else {
+							alert(res.data.msg);
+						}
+
+					})
+				}
+			},
+			created() {
+				// 打开页面时立即获取验证码
+				this.getImage();
+			},
+
+		});
+	</script>
+</html>
+

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace 的值为 dao接口 的全限定类名 -->
+<mapper namespace="cn.sea.dao.UserDao">
+
+    <cache type="cn.sea.cache.RedisCache"/>
+
+    <!-- 添加用户 -->
+    <insert id="save" parameterType="cn.sea.entity.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_user`(`id`,`username`,`realname`,`password`,`sex`,`status`,`registerTime`)
+        VALUES(#{id}, #{username}, #{realname}, #{password}, #{sex}, #{status}, #{registerTime});
+    </insert>
+
+    <!-- 根据用户名查询用户 -->
+    <select id="findByUsername" parameterType="string" resultType="cn.sea.entity.User">
+        SELECT `id`,`username`,`realname`,`password`,`sex`,`status`,`registerTime` FROM t_user WHERE `username`=#{username}
+    </select>
+
+</mapper>

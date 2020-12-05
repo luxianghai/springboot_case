@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<title>update Emp</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" type="text/css"
+			href="css/style.css" />
+	</head>
+
+	<body>
+		<div id="wrap">
+			<div id="top_content">
+				<div id="header">
+					<div id="rightheader">
+						<p>
+							2009/11/20
+							<br />
+							<a href="javascript:void(0)" @click="logout">安全退出</a>
+						</p>
+					</div>
+					<div id="topheader">
+						<h1 id="title">
+							<a href="#">main</a>
+						</h1>
+					</div>
+					<div id="navigation">
+					</div>
+				</div>
+				<div id="content">
+					<p id="whereami">
+					</p>
+					<h1>
+						update Emp info:
+					</h1>
+					<form action="emplist.html" method="post">
+						<table cellpadding="0" cellspacing="0" border="0"
+							class="form_table">
+							<tr>
+								<td valign="middle" align="right">
+									id:
+								</td>
+								<td valign="middle" align="left">
+									{{emp.id}}
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									name:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" v-model="emp.name" />
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									old photo:
+								</td>
+								<td valign="middle" align="left">
+									<img :src="'http://localhost:8989/ems_vue/photos/'+emp.imgPath" style="height: 40px">
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									new photo:
+								</td>
+								<td valign="middle" align="left">
+									<input type="file" class="inputgri" ref="photo"/>
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									salary:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" v-model="emp.salary"/>
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									age:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" v-model="emp.age"/>
+								</td>
+							</tr>
+						</table>
+						<p>
+							<input type="button" @click="editEmp" class="button" value="Confirm" />
+						</p>
+					</form>
+				</div>
+			</div>
+			<div id="footer">
+				<div id="footer_bg">
+					ABC@126.com
+				</div>
+			</div>
+		</div>
+	</body>
+	<script src="/ems_vue/js/vue-2.6.11.js"></script>
+	<script src="/ems_vue/js/axios.js"></script>
+	<script src="/ems_vue/js/base64.js"></script>
+	<script>
+		let app = new Vue({
+			el: '#wrap',
+			data:{
+				loginInfo:{}, // 用来保存用户数据,
+				emp: {}, // 员工信息
+			},
+			methods: {
+				// 登录
+				login() {
+					let _this = this;
+					axios.post("http://localhost:8989/ems_vue/user/login", this.loginInfo).then( res => {
+						console.log(res.data);
+						if( res.data.status ) {
+							alert(res.data.msg+", 点击确定进入主页 ~");
+
+							// 将用户数据进行加密处理
+							let base64 = new Base64();
+							let userBase64 = base64.encode(JSON.stringify(res.data.data));
+
+							// 将登录的用户信息放入 locationStorage 中， key=value
+							// 需要将js对象转为json数据保存到 locationStorage，使用JSON.stringfy();方法
+							localStorage.setItem("user",userBase64);
+
+							window.location = "http://localhost:8989/ems_vue/emplist.html";
+						} else {
+							alert(res.data.msg);
+						}
+					})
+				},
+				// 处理安全退出
+				logout() {
+					// 清除localStorage中保存的用户登录信息
+					localStorage.removeItem("user");
+					// 重新刷新页面，因为此时localStorage中的user信息已被清除，所有会重新跳转到登录页面（created函数中的操作）
+					location.reload();
+				},
+				// 查询一个员工
+				findOne() {
+					// 获取id
+					let start = location.href.lastIndexOf("=");
+					let id = location.href.substring(start+1);
+					let _this = this;
+					axios.get("http://localhost:8989/ems_vue/employee/findOne?id="+id).then( res => {
+						if( res.data.status ) {
+							_this.emp = res.data.data;
+						} else {
+							alert(res.data.msg);
+							location.href = "http://localhost:8989/ems_vue/emplist.html";
+						}
+					});
+
+				},
+				editEmp() {
+					let formDate = new FormData();
+					formDate.append("id", this.emp.id);
+					formDate.append("name", this.emp.name);
+					formDate.append("imgPath", this.emp.imgPath);
+					formDate.append("salary", this.emp.salary);
+					formDate.append("age", this.emp.age);
+					// 后端接口中接收该文件的MultipartFile变量名要和这里的key保持一致
+					formDate.append("photo", this.$refs.photo.files[0]);
+					axios({
+						url: "http://localhost:8989/ems_vue/employee/update",
+						method: 'post',
+						data: formDate,
+						headers: {
+							'content-type': 'multipart/form-data'
+						}
+					}).then( res => {
+						if( res.data.status ) {
+							if( window.confirm(res.data.msg + ", 点击确定回到主页")) {
+								location.href = "http://localhost:8989/ems_vue/emplist.html";
+							} else {
+								location.reload();
+							}
+						} else {
+							alert(res.data.msg);
+						}
+					})
+				}
+			},
+			created() {
+				this.findOne();
+			}
+		});
+	</script>
+</html>

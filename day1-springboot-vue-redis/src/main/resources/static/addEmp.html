@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<title>add Emp</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" type="text/css"
+			href="css/style.css" />
+	</head>
+
+	<body>
+		<div id="wrap">
+			<div id="top_content">
+				<div id="header">
+					<div id="rightheader">
+						<p>
+							2009/11/20
+							<br />
+							<a href="javascript:void(0)" @click="logout">安全退出</a>
+						</p>
+					</div>
+					<div id="topheader">
+						<h1 id="title">
+							<a href="#">main</a>
+						</h1>
+					</div>
+					<div id="navigation">
+					</div>
+				</div>
+				<div id="content">
+					<p id="whereami">
+					</p>
+					<h1>
+						add Emp info:
+					</h1>
+					<form action="javascript:void(0)" method="post">
+						<table cellpadding="0" cellspacing="0" border="0"
+							class="form_table">
+							<tr>
+								<td valign="middle" align="right">
+									name:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" v-model="emp.name" />
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									photo:
+								</td>
+								<td valign="middle" align="left">
+									<!-- 使用ref标记该文件input，便于获取 -->
+									<input type="file" class="inputgri" ref="myPhoto" />
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									salary:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" v-model="emp.salary" />
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									age:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" v-model="emp.age" />
+								</td>
+							</tr>
+						</table>
+						<p>
+							<input type="button" @click="saveEmp" class="button" value="Confirm" />
+						</p>
+					</form>
+				</div>
+			</div>
+			<div id="footer">
+				<div id="footer_bg">
+					ABC@126.com
+				</div>
+			</div>
+		</div>
+	</body>
+	<script src="/ems_vue/js/vue-2.6.11.js"></script>
+	<script src="/ems_vue/js/axios.js"></script>
+	<script src="/ems_vue/js/base64.js"></script>
+	<script>
+		let app = new Vue({
+			el: '#wrap',
+			data:{
+				loginInfo:{}, // 用来保存用户数据
+				emp:{}, // 员工对象
+			},
+			methods: {
+				// 登录
+				login() {
+					let _this = this;
+					axios.post("http://localhost:8989/ems_vue/user/login", this.loginInfo).then( res => {
+						console.log(res.data);
+						if( res.data.status ) {
+							alert(res.data.msg+", 点击确定进入主页 ~");
+
+							// 将用户数据进行加密处理
+							let base64 = new Base64();
+							let userBase64 = base64.encode(JSON.stringify(res.data.data));
+
+							// 将登录的用户信息放入 locationStorage 中， key=value
+							// 需要将js对象转为json数据保存到 locationStorage，使用JSON.stringfy();方法
+							localStorage.setItem("user",userBase64);
+
+							window.location = "http://localhost:8989/ems_vue/emplist.html";
+						} else {
+							alert(res.data.msg);
+						}
+					})
+				},
+				// 处理安全退出
+				logout() {
+					// 清除localStorage中保存的用户登录信息
+					localStorage.removeItem("user");
+					// 重新刷新页面，因为此时localStorage中的user信息已被清除，所有会重新跳转到登录页面（created函数中的操作）
+					location.reload();
+				},
+				// 保存用户信息
+				saveEmp() {
+					let _this = this;
+					//console.log(this.emp);
+					// 获取文件信息,第一个myPhost文件. files 属性表示获取文件列表
+					//console.log(this.$refs.myPhoto.files[0]);
+					// 准备表单数据
+					let formData = new FormData();
+					formData.append("name",this.emp.name);
+					formData.append("salary",this.emp.salary);
+					formData.append("age",this.emp.age);
+					formData.append("photo",this.$refs.myPhoto.files[0]);
+					// 文件上传时，请求方式必须是post， enctype必须为multiparty/form-data
+					axios({
+						method:"post",
+						url:"http://localhost:8989/ems_vue/employee/save",
+						data:formData,
+						headers: {
+							'content-type': 'multiparty/form-data', // 设置请求头
+						}
+					}).then( res => {
+						if( res.data.status ) {
+							if( window.confirm(res.data.msg + ", 点击确定回到主页 ~")) {
+								location.href = "http://localhost:8989/ems_vue/emplist.html";
+							} else {
+								// 清空表单数据
+								_this.emp = {};
+							}
+
+						} else {
+							alert(res.data.msg);
+						}
+					})
+				}
+			}
+		})
+	</script>
+</html>

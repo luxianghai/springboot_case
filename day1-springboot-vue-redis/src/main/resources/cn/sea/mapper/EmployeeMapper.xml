@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace 的值为 dao接口 的全限定类名 -->
+<mapper namespace="cn.sea.dao.EmployeeDao">
+
+    <!-- 使用自定义缓存 -->
+    <cache type="cn.sea.cache.RedisCache"/>
+
+    <!-- 查询所有 -->
+    <select id="findAll" resultType="cn.sea.entity.Employee">
+        SELECT `id`,`name`,`imgPath`,`salary`,`age`
+        FROM `t_emp`
+    </select>
+
+    <!-- 保存员工信息 -->
+    <insert id="save" parameterType="cn.sea.entity.Employee" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_emp`(`id`,`name`,`imgPath`,`salary`,`age`)
+        VALUES(#{id},#{name},#{imgPath},#{salary},#{age})
+    </insert>
+
+    <!-- 删除员工信息 -->
+    <delete id="delete" parameterType="string">
+        DELETE FROM `t_emp` WHERE `id` = #{id}
+    </delete>
+
+    <!-- 根据id查询员工信息 -->
+    <select id="findOne" parameterType="string" resultType="cn.sea.entity.Employee">
+        SELECT `id`,`name`,`imgPath`,`salary`,`age`
+        FROM `t_emp` WHERE `id` = #{id}
+    </select>
+
+    <!-- 根据id修改员工信息 -->
+    <update id="update" parameterType="cn.sea.entity.Employee" >
+        UPDATE `t_emp`
+        SET `name` = #{name},
+        `imgPath` = #{imgPath},
+        `salary` = #{salary},
+        `age` = #{age}
+        WHERE `id` = #{id}
+    </update>
+
+</mapper>
