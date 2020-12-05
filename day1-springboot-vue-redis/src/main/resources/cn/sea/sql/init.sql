@@ -4,19 +4,10 @@ MySQL - 5.5.15 : Database - springboot_vue_case1
 *********************************************************************
 */
 
-/*!40101 SET NAMES utf8 */;
-
-/*!40101 SET SQL_MODE=''*/;
-
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-CREATE DATABASE /*!32312 IF NOT EXISTS*/`springboot_vue_case1` /*!40100 DEFAULT CHARACTER SET utf8 */;
+CREATE DATABASE `springboot_vue_case1` ;
 
 USE `springboot_vue_case1`;
 
-/*Table structure for table `t_emp` */
 
 DROP TABLE IF EXISTS `t_emp`;
 
@@ -29,9 +20,6 @@ CREATE TABLE `t_emp` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*Data for the table `t_emp` */
-
-/*Table structure for table `t_user` */
 
 DROP TABLE IF EXISTS `t_user`;
 
@@ -46,9 +34,38 @@ CREATE TABLE `t_user` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*Data for the table `t_user` */
+---------------------------------------------------------------------------
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+各种语句
+
+INSERT INTO `t_user`(`id`,`username`,`realname`,`password`,`sex`,`status`,`registerTime`)
+VALUES(#{id}, #{username}, #{realname}, #{password}, #{sex}, #{status}, #{registerTime});
+
+SELECT `id`,`username`,`realname`,`password`,`sex`,`status`,`registerTime` FROM t_user WHERE `username`=#{username};
+
+TRUNCATE TABLE t_user;
+
+SELECT `id`,`name`,`imgPath`,`salary`,`age`
+FROM `t_emp`;
+
+SELECT `id`,`name`,`imgPath`,`salary`,`age`
+FROM `t_emp` WHERE `id` = #{id};
+
+INSERT INTO `t_emp`(`id`,`name`,`imgPath`,`salary`,`age`)
+VALUES(#{id},#{name},#{imgPath},#{salary},#{age});
+
+INSERT INTO `t_emp`(`id`,`name`,`imgPath`,`salary`,`age`)
+VALUES(NULL,'魏无羡',NULL,8000,18);
+INSERT INTO `t_emp`(`id`,`name`,`imgPath`,`salary`,`age`)
+VALUES(NULL,'张无忌',NULL,7800,21);
+
+TRUNCATE TABLE `t_emp`;
+
+DELETE FROM `t_emp` WHERE `id` = #{id}
+
+UPDATE `t_emp`
+SET `name` = #{name},
+`imgPath` = #{imgPath},
+`salary` = #{salary},
+`age` = #{age}
+WHERE `id` = #{id};
