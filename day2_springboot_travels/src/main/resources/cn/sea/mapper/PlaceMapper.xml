@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace 的值为 dao接口 的全限定类名 -->
+<mapper namespace="cn.sea.dao.PlaceDao">
+
+    <!-- 根据省份id分页查询当前省份下的景点 -->
+    <select id="findByProvinceIdWithPage"  resultType="cn.sea.entity.Place">
+        SELECT `id`,`name`,`picpath`,`hottime`,`hotticket`,
+        `dimticket`,`placedesc`,`provinceid`
+        FROM `t_place`
+        WHERE `provinceid` = #{provinceid}
+        LIMIT #{start},#{rows}
+    </select>
+
+    <!-- 根据省份id查询当前省份下的景点总数 -->
+    <select id="findTotalsByProvinceId" parameterType="String" resultType="Long">
+        SELECT COUNT(`id`) FROM `t_place` WHERE `provinceid` = #{provinceid}
+    </select>
+
+    <!-- 保存景点信息 -->
+    <insert id="save" parameterType="cn.sea.entity.Place" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_place`(`id`,`name`,`picpath`,`hottime`,`hotticket`,`dimticket`,`placedesc`,`provinceid` )
+        VALUES(#{id}, #{name}, #{picpath}, #{hottime}, #{hotticket}, #{dimticket}, #{placedesc}, #{provinceid})
+    </insert>
+
+    <!-- 删除景点信息 -->
+    <delete id="delete" parameterType="String">
+        DELETE FROM `t_place` WHERE `id` = #{id}
+    </delete>
+
+    <!-- 根据id查询景点信息 -->
+    <select id="findByPrimaryKey" parameterType="String" resultType="cn.sea.entity.Place">
+        SELECT `id`,`name`,`picpath`,`hottime`,`hotticket`,
+        `dimticket`,`placedesc`,`provinceid`
+        FROM `t_place` WHERE `id` = #{id}
+    </select>
+
+    <!-- 修改景点信息 -->
+    <update id="update" parameterType="cn.sea.entity.Place">
+        update `t_place` SET
+        `name` = #{name},
+        <if test="picpath != null and picpath != ''">
+            `picpath` = #{picpath},
+        </if>
+        `hottime` = #{hottime},
+        `hotticket` = #{hotticket},
+        `dimticket` = #{dimticket},
+        `placedesc` = #{placedesc}
+        WHERE `id` = #{id}
+    </update>
+</mapper>

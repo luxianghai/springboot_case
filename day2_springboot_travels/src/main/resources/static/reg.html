@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        form{
+            width:270px;
+        }
+        input{
+            width: 70%;
+            background: #eee;
+        }
+        input:focus{
+            background: #fff;
+        }
+        form{
+            padding: 0 12px 12px;
+        }
+        label{
+            display: block;
+            padding-bottom:12px;
+        }
+        #img-vcode{
+            width: 56px;
+            height: 21px;
+            float:right;
+            position: relative;
+            top:2px;
+            left:-6px
+        }
+        .label-text{
+            width: 30%;
+            float: left;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="wrap">
+        <div id="header">
+            <div style="float: right;padding-top: 24px">2009/11/20</div>
+            <h1>旅游信息管理系统</h1>
+        </div>
+        <div id="header-bar"></div>
+        <div id="content" style="height: 360px">
+            <img src="img/timg.jpg" style="float: right;height: 320px">
+            <h2>注册</h2>
+            <form action="javascript:void(0)" method="post">
+                <label>
+                    <div class="label-text">账&emsp;号：</div>
+                    <input type="text" v-model="user.username">
+                </label>
+                <label>
+                    <div class="label-text">密&emsp;码：</div>
+                    <input type="password" v-model="user.password">
+                </label>
+                <label>
+                    <div class="label-text">邮&emsp;箱：</div>
+                    <input type="text" v-model="user.email">
+                </label>
+                <img :src="imageSrc" @click="getImage" id="img-vcode">
+                <label>
+                    <div class="label-text">验证码：</div>
+                    <input type="text" v-model="code" :key="key" style="width: 100px">
+                </label>
+                <button type="button" @click="saveUserInfo">提 交</button>&emsp;
+                <a href="login.html">去登录</a>
+            </form>
+        </div>
+        <div id="footer">
+            ABC@126.com
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script src="./js/vue.js"></script>
+<script src="./js/axios.min.js"></script>
+<script>
+    const app = new Vue({
+        el: '#app',
+        data:{
+            user:{}, // 保存用户的注册信息
+            code: '', // 用户输入的验证码
+            imageSrc:'', // 验证码图片路径
+            key:'', // 验证码图片的key
+        },
+        methods: {
+            // 切换图片验证码
+            getImage() {
+                let _this = this;
+                axios.get('http://localhost:8989/user/getImage?time='+new Date().getTime()).then( res => {
+                    if( res.data.status ) {
+                        _this.imageSrc = res.data.data.image;
+                        _this.key = res.data.data.key;
+                    } else {
+                        alert(res.data.msg);
+                    }
+                })
+            },
+            // 用户注册
+            saveUserInfo() {
+                let _usr = this.user;
+                if( !_usr.username || !_usr.password || !_usr.email || !this.code) {
+                    alert("请完整填写表单！！！");
+                    return;
+                }
+                console.log(this.user);
+                console.log(this.code);
+                // 发送axios请求
+                axios.post("http://localhost:8989/user/register?code="+this.code+"&key="+this.key,this.user).then( res => {
+                    console.log(res.data);
+                    if (res.data.status) {
+                        alert(res.data.msg + ", 点击确定跳转到登录 ！！");
+                        location.href = './login.html';
+                    } else {
+                        alert(res.data.msg);
+                    }
+                })
+            },
+
+        },
+        created() {
+            this.getImage();
+        },
+
+    });
+</script>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        form{
+            width:270px;
+        }
+        input{
+            width: 70%;
+            background: #eee;
+        }
+        input:focus{
+            background: #fff;
+        }
+        form{
+            padding: 0 12px 12px;
+        }
+        label{
+            display: block;
+            padding-bottom:12px;
+        }
+        #img-vcode{
+            width: 56px;
+            height: 21px;
+            float:right;
+            position: relative;
+            top:2px;
+            left:-6px
+        }
+        .label-text{
+            width: 30%;
+            float: left;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="wrap">
+        <div id="header">
+            <div style="float: right;padding-top: 24px">2009/11/20</div>
+            <h1>旅游信息管理系统</h1>
+        </div>
+        <div id="header-bar"></div>
+        <div id="content" style="height: 360px">
+            <img src="img/timg.jpg" style="float: right;height: 320px">
+            <h2>登录</h2>
+            <form action="javascript:void(0)" method="post">
+                <label>
+                    <div class="label-text">账&emsp;号：</div>
+                    <input type="text" v-model="user.username" name="username">
+                </label>
+                <label>
+                    <div class="label-text">密&emsp;码：</div>
+                    <input type="password" v-model="user.password" name="password">
+                </label>
+                <img :src="imageSrc" @click="getImage" id="img-vcode">
+                <label>
+                    <div class="label-text">验证码：</div>
+                    <input type="text" v-model="code" :key="key" style="width: 100px">
+                </label>
+                <button type="button" @click="login">提 交</button>&emsp;
+                <a href="./reg.html">去注册</a>
+            </form>
+        </div>
+        <div id="footer">
+            ABC@126.com
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script src="./js/vue.js"></script>
+<script src="./js/axios.min.js"></script>
+<script>
+    const app = new Vue({
+        el: '#app',
+        data:{
+            user: {}, // 登录用户的信息
+            imageSrc:'', // 图片验证码的路径,
+            key:'', // 验证码的key
+            code:'', // 用户输入的图片验证码
+            UMD5U:'', // 后端验证码
+        },
+        methods: {
+            // 获取图片验证码
+            getImage() {
+                let _this = this;
+                axios.get('http://localhost:8989/user/getImage?time='+new Date().getTime()).then( res => {
+                    if( res.data.status) {
+                        _this.imageSrc = res.data.data.image;
+                        _this.key = res.data.data.key;
+                        _this.UMD5U= res.data.data.UMD5U;
+                    } else {
+                        alert(res.data.msg);
+                    }
+                })
+            },
+            // 登录方法
+            login() {
+              if( !this.user.username || !this.user.password || !this.code ) {
+                  alert("请完整填写表单");
+                  return;
+              }
+              if( this.code !== this.UMD5U ) {
+                  alert("验证码错误");
+                  return;
+              }
+              let _this = this;
+              axios.post('http://localhost:8989/user/login',this.user).then( res => {
+                  console.log(res);
+                  if( res.data.status ) {
+                    alert(res.data.msg+", 点击确定进入主页");
+                    // 从请求头中拿到userid并保存到 localStorage 中
+                    localStorage.setItem('usreid', res.headers.userid);
+                    location.href = './province/provincelist.html';
+                } else {
+                    alert(res.data.msg);
+                    _this.getImage();
+                }
+              })
+            },
+
+        },
+
+        created() {
+            // 获取图片验证码
+            this.getImage();
+        }
+    });
+</script>
